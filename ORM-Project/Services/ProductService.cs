@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using ORM_Project.Context;
+using ORM_Project.Dtos.ProductDtos;
 using ORM_Project.Exceptions;
 using ORM_Project.Models;
 
@@ -7,13 +8,23 @@ namespace ORM_Project.Services
 {
     public class ProductService
     {
-        public async Task CreateAsync(Product product)
+        public async Task CreateAsync(ProductCreateDto productDto)
         {
             AppDbContext context = new AppDbContext();
+
+            Product product = new()
+            {
+                Name=productDto.ProductName,
+                Price=productDto.ProductPrice,
+                Stock=productDto.ProductStock,
+                Description=productDto.ProductDescription,
+                CreatedDate =DateTime.Now,
+                UpdatedDate =DateTime.Now
+            };
             await context.Products.AddAsync(product);
             await context.SaveChangesAsync();
         }
-        public async Task UpdateAsync(Product product)
+        public async Task UpdateAsync(ProductUpdateDto product)
         {
             AppDbContext context = new AppDbContext();
             var DbProduct = await context.Products.FirstOrDefaultAsync(p => p.Id == product.Id);
@@ -21,10 +32,11 @@ namespace ORM_Project.Services
             {
                 throw new NotFoundException("Product not found...");
             }
-            DbProduct.Name = product.Name;
-            DbProduct.Price = product.Price;
-            DbProduct.Stock = product.Stock;
-            DbProduct.Description = product.Description;
+            DbProduct.Name = product.ProductName;
+            DbProduct.Price = product.ProductPrice;
+            DbProduct.Stock = product.ProductStock;
+            DbProduct.Description = product.ProductDescription;
+
             await context.SaveChangesAsync();
         }
 

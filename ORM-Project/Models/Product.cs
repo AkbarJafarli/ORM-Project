@@ -9,5 +9,22 @@
         public string Description { get; set; }
         public DateTime CreatedDate { get; set; }
         public DateTime UpdatedDate { get; set; }
+
+        public Product(int id,string name,decimal price,int stock,string description,DateTime createdDate,DateTime updatedDate)
+        {
+            Id = id;
+            Name = name;
+            Price = price;
+            Stock = stock;
+            Description = description;
+            CreatedDate = createdDate;
+            UpdatedDate = updatedDate;
+        }
+        public Product()
+        {
+            
+        }
     }
+
+    
 }

@@ -10,4 +10,5 @@ namespace ORM_Project.Models
         public decimal TotalAmount { get; set; }
         public OrderStatus Status { get; set; }
     }
+    
 }

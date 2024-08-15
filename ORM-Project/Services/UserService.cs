@@ -4,6 +4,8 @@
 //using ORM_Project.Exceptions;
 //using ORM_Project.Models;
 
+using ClosedXML.Excel;
+using DocumentFormat.OpenXml.Drawing;
 using Microsoft.EntityFrameworkCore;
 using ORM_Project.Context;
 using ORM_Project.Dtos.UserDtos;
@@ -16,17 +18,23 @@ namespace ORM_Project.Services;
 public class UserService : IUserService
 {
     private readonly AppDbContext _context;
-    public UserService(AppDbContext context)
+    public UserService()
     {
-        _context = context;
+        _context = new();
     }
 
     public async Task RegisterUserAsync(RegisterDto registerDto)
     {
+        bool isCorrect = false;
         if (string.IsNullOrWhiteSpace(registerDto.email) || string.IsNullOrWhiteSpace(registerDto.password))
         {
             throw new InvalidUserInformationException("Email and password cannot be empty.");
         }
+        var isExist = await _context.Users.AnyAsync(x => x.Email == registerDto.email);
+
+        if (isExist)
+            throw new InvalidUserInformationException("This email is already exist");
+
         var user = new User(registerDto.email, registerDto.password)
         {
             Fullname = registerDto.fullname,
@@ -64,11 +72,11 @@ public class UserService : IUserService
     {
         var orders = await _context.Orders.Where(o => o.UserId == userId).Select(o => new OrderDto
         {
-            id=o.Id,
-            userId=o.UserId,
-            orderDate=o.OrderDate,
-            totalAmount=o.TotalAmount,
-            status=o.Status,
+            id = o.Id,
+            userId = o.UserId,
+            orderDate = o.OrderDate,
+            totalAmount = o.TotalAmount,
+            status = o.Status,
         }).ToListAsync();
         return orders;
     }

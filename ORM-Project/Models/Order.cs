@@ -9,6 +9,8 @@ namespace ORM_Project.Models
         public DateTime OrderDate { get; set; }
         public decimal TotalAmount { get; set; }
         public OrderStatus Status { get; set; }
+
+        public List<OrderDetail> OrderDetails { get; set; } = new();
     }
     
 }

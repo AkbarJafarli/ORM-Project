@@ -17,11 +17,6 @@ namespace ORM_Project.Services
 
         public async Task CreateOrderAsync(Order order)
         {
-            if (order.TotalAmount < 0)
-            {
-                throw new InvalidOrderException("Order amount connot be negative");
-            }
-
             var userExists = await _context.Users.AnyAsync(u => u.Id == order.UserId);
             if (!userExists)
             {
@@ -44,6 +39,7 @@ namespace ORM_Project.Services
                 throw new OrderAlreadyCancelledException("Order has already been cancelled.");
             }
             order.Status = OrderStatus.Cancelled;
+            _context.Update(order); 
             await _context.SaveChangesAsync();
         }
         public async Task CompleteOrderAsync(int orderId)
@@ -63,7 +59,7 @@ namespace ORM_Project.Services
 
         public async Task<List<Order>> GetOrderAsync()
         {
-            return await _context.Orders.ToListAsync();
+            return await _context.Orders.Include(x=>x.OrderDetails).ThenInclude(x=>x.Product).ToListAsync();
         }
 
         public async Task AddOrderDetailAsync(OrderDetail orderDetail)
@@ -72,11 +68,8 @@ namespace ORM_Project.Services
             {
                 throw new InvalidOrderDetailException("Quantity cannot be negative");
             }
-            if (orderDetail.PricePerItem < 0)
-            {
-                throw new InvalidOrderDetailException("Price per item cannot be negative");
-            }
-            var order = await _context.Orders.FindAsync(orderDetail.OrderId);
+         
+            var order = await _context.Orders.FirstOrDefaultAsync(x=>x.Id==orderDetail.OrderId);
             if (order == null)
             {
                 throw new NotFoundException("Order not found");
@@ -86,6 +79,8 @@ namespace ORM_Project.Services
             {
                 throw new NotFoundException("Product not found");
             }
+
+            orderDetail.PricePerItem = product.Price;
             await _context.OrderDetails.AddAsync(orderDetail);
             await _context.SaveChangesAsync();
         }

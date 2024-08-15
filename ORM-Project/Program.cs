@@ -249,12 +249,14 @@ while (true)
                 Console.WriteLine("Menu:");
                 Console.WriteLine("[1]Create order");
                 Console.WriteLine("[2]Cancel order");
-                Console.WriteLine("[3]Complete order");
-                Console.WriteLine("[4]Get order");
-                Console.WriteLine("[5]Add order detail");
+                Console.WriteLine("[3]Add order detail");
+                Console.WriteLine("[4]Complete order");
+                Console.WriteLine("[5]Get orders");
                 Console.WriteLine("[6]Get order detail by order id");
+                Console.WriteLine("[7]Payment");
+                Console.WriteLine("[0]Exit");
                 Console.WriteLine("");
-                Console.Write("Select");
+                Console.Write("Select:");
                 if (!int.TryParse(Console.ReadLine(), out int choice3))
                 {
                     Console.WriteLine("Invalid input,please enter a number");
@@ -264,25 +266,136 @@ while (true)
                 {
                     case 1:
                     restart10:
-                        Console.Write("Enter order id:");
-                        if (!int.TryParse(Console.ReadLine(), out int id4))
-                        {
-                            Console.WriteLine("Invalid input,please enter a number");
-                            goto restart10;
-                        }
-                        Console.Write("Enter total amount:");
-                        decimal amount = decimal.Parse(Console.ReadLine());
+
                         var order = new Order
                         {
-                            Id = id4,
+                            UserId = activeUser.Id,
                             OrderDate = DateTime.Now,
-                            TotalAmount = amount,
+                            TotalAmount = 0,
                             Status = OrderStatus.Pending
                         };
+                        try
+                        {
+
                             await orderService.CreateOrderAsync(order);
                             Console.WriteLine("Order created succesfully");
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine(ex.Message);
                             break;
-                    default: goto restart10;
+                        }
+                        break;
+
+                    case 2:
+                    restart12:
+                        Console.Write("Select Order:");
+                        if (!int.TryParse(Console.ReadLine(), out int orderId))
+                        {
+                            Console.WriteLine("Invalid input,please enter a number");
+                            goto restart12;
+                        }
+                        try
+                        {
+                            await orderService.CancelOrderAsync(orderId);
+                            Console.WriteLine("Order canceled succesfully");
+                        }
+                        catch (NotFoundException ex)
+                        {
+                            Console.WriteLine(ex.Message);
+                            break;
+                        }
+                        break;
+
+                    case 3:
+                    restart13:
+                        Console.Write("Enter order id:");
+
+                        if (!int.TryParse(Console.ReadLine(), out int orderId2))
+                        {
+                            Console.WriteLine("Invalid input,please enter a number");
+                            goto restart13;
+                        }
+                    restart14:
+                        Console.Write("Enter product id:");
+                        if (!int.TryParse(Console.ReadLine(), out int productId))
+                        {
+                            Console.WriteLine("Invalid input,please enter a number");
+                            goto restart14;
+                        }
+                    restart15:
+                        Console.Write("Enter product quantity:");
+                        if (!int.TryParse(Console.ReadLine(), out int quantity))
+                        {
+                            Console.WriteLine("Invalid input,please enter a number");
+                            goto restart15;
+                        }
+                        var orderDetail = new OrderDetail
+                        {
+                            OrderId = orderId2,
+                            ProductId = productId,
+                            Quantity = quantity,
+
+                        };
+
+                        await orderService.AddOrderDetailAsync(orderDetail);
+                        Console.WriteLine("Order Detail successfully added");
+
+                        break;
+
+                    case 4:
+                    restart16:
+                        Console.Write("Enter order id:");
+                        if (!int.TryParse(Console.ReadLine(), out int orderId3))
+                        {
+                            Console.WriteLine("Invalid input,please enter a number");
+                            goto restart16;
+                        }
+                        var orderDetail2 = new OrderDetail
+                        {
+                            OrderId = orderId3
+                        };
+                        try
+                        {
+                            await orderService.CompleteOrderAsync(orderId3);
+                            Console.WriteLine("Order completed succesfully");
+                        }
+                        catch (NotFoundException ex)
+                        {
+                            Console.WriteLine(ex.Message);
+                            break;
+                        }
+                        break;
+
+                    case 5:
+                        var orders = await orderService.GetOrderAsync();
+                        foreach (var order1 in orders)
+                        {
+                            Console.WriteLine($"Id:{order1.Id} - Date:{order1.OrderDate} - Amount:{order1.TotalAmount} Status {order1.Status.ToString()}");
+                            foreach (var orderDetail1 in order1.OrderDetails)
+                            {
+                                Console.WriteLine($"----Name:{orderDetail1.Product.Name} - Quantity:{orderDetail1.Quantity} - Price:{orderDetail1.PricePerItem}");
+                            }
+                        }
+                        break;
+
+                    case 6:
+                    restart17:
+                        Console.Write("Enter order id:");
+                        if (!int.TryParse(Console.ReadLine(), out int orderId4))
+                        {
+                            Console.WriteLine("Invalid input,please enter a number");
+                            goto restart17;
+                        }
+                        var orderDetails = await orderService.GetOrderDetailsByOrderIdAsync(orderId4);
+                        foreach (var details in orderDetails)
+                        {
+                            Console.WriteLine($"Id:{details.Id} - Quantity:{details.Quantity} - Price per item:{details.PricePerItem}");
+                        }
+                        break;
+
+
+                    default: goto restart11;
                 }
             }
         default: goto restart2;

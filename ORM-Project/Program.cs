@@ -425,6 +425,7 @@ while (true)
                     restart18:
                         while (true)
                         {
+                            Console.WriteLine("");
                             Console.WriteLine("Menu:");
                             Console.WriteLine("");
                             Console.WriteLine("[1]Make payment");

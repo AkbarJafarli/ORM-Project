@@ -12,5 +12,5 @@ namespace ORM_Project.Models
 
         public List<OrderDetail> OrderDetails { get; set; } = new();
     }
-    
+
 }

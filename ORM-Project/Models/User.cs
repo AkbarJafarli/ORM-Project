@@ -9,7 +9,7 @@
         public string Address { get; set; }
 
 
-        public User(string email,string password)
+        public User(string email, string password)
         {
             Email = email;
             Password = password;

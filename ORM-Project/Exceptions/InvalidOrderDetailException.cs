@@ -1,8 +1,8 @@
 ﻿namespace ORM_Project.Exceptions
 {
-    public class InvalidOrderDetailException:Exception
+    public class InvalidOrderDetailException : Exception
     {
-        public InvalidOrderDetailException(string message):base(message) { }
+        public InvalidOrderDetailException(string message) : base(message) { }
 
     }
 }

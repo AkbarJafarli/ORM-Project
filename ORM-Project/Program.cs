@@ -1,6 +1,4 @@
-﻿using DocumentFormat.OpenXml.Spreadsheet;
-using Microsoft.Extensions.Options;
-using ORM_Project.Context;
+﻿using ORM_Project.Context;
 using ORM_Project.Dtos.ProductDtos;
 using ORM_Project.Dtos.UserDtos;
 using ORM_Project.Enum;
@@ -13,12 +11,13 @@ User activeUser = new User("admin@gmail.com", "admin123");
 ProductService productService = new ProductService();
 var context = new AppDbContext();
 OrderService orderService = new OrderService(context);
+var context1 = new AppDbContext();
+PaymentService paymentService = new PaymentService(context1);
 
 Console.WriteLine("Welcome to the WOLT application.");
 Console.WriteLine("Menu:");
 Console.WriteLine("");
 restart:
-
 Console.WriteLine("[1]Registration");
 Console.WriteLine("[2]Login");
 Console.WriteLine("");
@@ -122,6 +121,7 @@ while (true)
     Console.WriteLine("[5]Search Products");
     Console.WriteLine("[6]Get Product by Id");
     Console.WriteLine("[7]Order management menu:");
+    Console.WriteLine("[0]Exit");
     Console.WriteLine("");
     Console.Write("Select:");
     if (!int.TryParse(Console.ReadLine(), out int choice2))
@@ -157,6 +157,8 @@ while (true)
             productCreateDto.ProductStock = productstock;
             productCreateDto.ProductDescription = productdescription;
             await productService.CreateAsync(productCreateDto);
+            Console.WriteLine("");
+            Console.WriteLine("Product succesfully added");
             break;
 
         case 2:
@@ -171,10 +173,20 @@ while (true)
             }
             Console.Write("Enter product name:");
             string ProductName = Console.ReadLine();
+        restart22:
             Console.Write("Enter product price:");
-            decimal ProductPrice = decimal.Parse(Console.ReadLine());
+            if (!decimal.TryParse(Console.ReadLine(), out decimal ProductPrice))
+            {
+                Console.WriteLine("Invalid input please enter a number");
+                goto restart22;
+            }
+        restart23:
             Console.Write("Enter product stock count:");
-            int ProductStock = int.Parse(Console.ReadLine());
+            if (!int.TryParse(Console.ReadLine(), out int ProductStock))
+            {
+                Console.WriteLine("Invalid input please enter a number");
+                goto restart23;
+            }
             Console.Write("Enter product description:");
             string ProductDescription = Console.ReadLine();
 
@@ -184,6 +196,8 @@ while (true)
             productUpdateDto.ProductStock = ProductStock;
             productUpdateDto.ProductDescription = ProductDescription;
             await productService.UpdateAsync(productUpdateDto);
+            Console.WriteLine("");
+            Console.WriteLine("Product succesfully updated");
             break;
 
         case 3:
@@ -224,7 +238,7 @@ while (true)
                 }
                 break;
             }
-            catch (Exception ex)
+            catch (InvalidProductException ex)
             {
                 throw new InvalidProductException("Product not found");
             }
@@ -237,9 +251,19 @@ while (true)
                 Console.WriteLine("Invalid input,please enter a number");
                 goto restart5;
             }
-            var product2 = await productService.GetProductByIdAsync(id3);
-            Console.WriteLine($"Product id:{product2.Id} - Product name:{product2.Name} - Product price:{product2.Price} - Product description:{product2.Description} - Created date:{product2.CreatedDate}");
+            try
+            {
+                var product2 = await productService.GetProductByIdAsync(id3);
+                Console.WriteLine($"Product id:{product2.Id} - Product name:{product2.Name} - Product price:{product2.Price} - Product description:{product2.Description} - Created date:{product2.CreatedDate}");
+            }
+            catch (NotFoundException ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
             break;
+
+        case 0:
+            goto restart;
 
         case 7:
         restart11:
@@ -247,6 +271,7 @@ while (true)
             {
                 Console.WriteLine("");
                 Console.WriteLine("Menu:");
+                Console.WriteLine("");
                 Console.WriteLine("[1]Create order");
                 Console.WriteLine("[2]Cancel order");
                 Console.WriteLine("[3]Add order detail");
@@ -260,7 +285,7 @@ while (true)
                 if (!int.TryParse(Console.ReadLine(), out int choice3))
                 {
                     Console.WriteLine("Invalid input,please enter a number");
-                    goto restart;
+                    goto restart11;
                 }
                 switch (choice3)
                 {
@@ -340,7 +365,6 @@ while (true)
 
                         await orderService.AddOrderDetailAsync(orderDetail);
                         Console.WriteLine("Order Detail successfully added");
-
                         break;
 
                     case 4:
@@ -394,7 +418,75 @@ while (true)
                         }
                         break;
 
+                    case 0:
+                        goto restart2;
 
+                    case 7:
+                    restart18:
+                        while (true)
+                        {
+                            Console.WriteLine("Menu:");
+                            Console.WriteLine("");
+                            Console.WriteLine("[1]Make payment");
+                            Console.WriteLine("[2]Get payments");
+                            Console.WriteLine("[0]Exit");
+                            Console.WriteLine("");
+                        restart19:
+                            Console.Write("Select:");
+                            if (!int.TryParse(Console.ReadLine(), out int choice4))
+                            {
+                                Console.WriteLine("Invalid input,please enter a number");
+                                goto restart19;
+                            }
+                            switch (choice4)
+                            {
+                                case 1:
+                                restart20:
+                                    Console.Write("Enter order id:");
+                                    if (!int.TryParse(Console.ReadLine(), out int paymentOrderId))
+                                    {
+                                        Console.WriteLine("Invalid input,please enter a number");
+                                        goto restart20;
+                                    }
+                                restart21:
+                                    Console.Write("Enter amount:");
+                                    if (!decimal.TryParse(Console.ReadLine(), out decimal amount))
+                                    {
+                                        Console.WriteLine("Invalid input,please enter a number");
+                                        goto restart21;
+                                    }
+                                    var payment = new Payment
+                                    {
+                                        OrderId = paymentOrderId,
+                                        Amount = amount,
+                                        PaymentDate = DateTime.Now,
+                                    };
+                                    try
+                                    {
+                                        await paymentService.MakePaymentAsync(payment);
+                                        Console.WriteLine("Payment succesfully made");
+                                    }
+                                    catch (NotFoundException ex)
+                                    {
+                                        Console.WriteLine(ex.Message);
+                                    }
+                                    break;
+
+                                case 2:
+                                    var payments = await paymentService.GetPaymentsAsync();
+                                    foreach (var pay in payments)
+                                    {
+                                        Console.WriteLine($"Id:{pay.Id} - Order id:{pay.OrderId} - Amount:{pay.Amount} - Date:{pay.PaymentDate}");
+                                    }
+                                    break;
+
+                                case 0:
+                                    goto restart11;
+
+                                default: goto restart18;
+                            }
+
+                        }
                     default: goto restart11;
                 }
             }

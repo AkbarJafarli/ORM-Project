@@ -39,7 +39,7 @@ namespace ORM_Project.Services
                 throw new OrderAlreadyCancelledException("Order has already been cancelled.");
             }
             order.Status = OrderStatus.Cancelled;
-            _context.Update(order); 
+            _context.Update(order);
             await _context.SaveChangesAsync();
         }
         public async Task CompleteOrderAsync(int orderId)
@@ -59,7 +59,7 @@ namespace ORM_Project.Services
 
         public async Task<List<Order>> GetOrderAsync()
         {
-            return await _context.Orders.Include(x=>x.OrderDetails).ThenInclude(x=>x.Product).ToListAsync();
+            return await _context.Orders.Include(x => x.OrderDetails).ThenInclude(x => x.Product).ToListAsync();
         }
 
         public async Task AddOrderDetailAsync(OrderDetail orderDetail)
@@ -68,8 +68,8 @@ namespace ORM_Project.Services
             {
                 throw new InvalidOrderDetailException("Quantity cannot be negative");
             }
-         
-            var order = await _context.Orders.FirstOrDefaultAsync(x=>x.Id==orderDetail.OrderId);
+
+            var order = await _context.Orders.FirstOrDefaultAsync(x => x.Id == orderDetail.OrderId);
             if (order == null)
             {
                 throw new NotFoundException("Order not found");
@@ -85,9 +85,9 @@ namespace ORM_Project.Services
             await _context.SaveChangesAsync();
         }
 
-        public async Task<List<OrderDetail>>GetOrderDetailsByOrderIdAsync(int orderId)
+        public async Task<List<OrderDetail>> GetOrderDetailsByOrderIdAsync(int orderId)
         {
-            var orderDetails = await _context.OrderDetails.Where(od=>od.OrderId == orderId).ToListAsync();
+            var orderDetails = await _context.OrderDetails.Where(od => od.OrderId == orderId).ToListAsync();
             if (!orderDetails.Any())
             {
                 throw new NotFoundException("Order details not found for the given order ID.");

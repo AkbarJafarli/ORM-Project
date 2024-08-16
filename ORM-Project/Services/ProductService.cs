@@ -14,12 +14,12 @@ namespace ORM_Project.Services
 
             Product product = new()
             {
-                Name=productDto.ProductName,
-                Price=productDto.ProductPrice,
-                Stock=productDto.ProductStock,
-                Description=productDto.ProductDescription,
-                CreatedDate =DateTime.Now,
-                UpdatedDate =DateTime.Now
+                Name = productDto.ProductName,
+                Price = productDto.ProductPrice,
+                Stock = productDto.ProductStock,
+                Description = productDto.ProductDescription,
+                CreatedDate = DateTime.Now,
+                UpdatedDate = DateTime.Now
             };
             await context.Products.AddAsync(product);
             await context.SaveChangesAsync();
@@ -65,7 +65,7 @@ namespace ORM_Project.Services
         public async Task<Product> GetProductByIdAsync(int id)
         {
             AppDbContext context = new AppDbContext();
-            var product = await context.Products.FirstOrDefaultAsync(p=>p.Id==id);
+            var product = await context.Products.FirstOrDefaultAsync(p => p.Id == id);
             if (product == null)
             {
                 throw new NotFoundException("Product not found...");

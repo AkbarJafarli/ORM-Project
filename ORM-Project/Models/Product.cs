@@ -10,7 +10,7 @@
         public DateTime CreatedDate { get; set; }
         public DateTime UpdatedDate { get; set; }
 
-        public Product(int id,string name,decimal price,int stock,string description,DateTime createdDate,DateTime updatedDate)
+        public Product(int id, string name, decimal price, int stock, string description, DateTime createdDate, DateTime updatedDate)
         {
             Id = id;
             Name = name;
@@ -22,9 +22,9 @@
         }
         public Product()
         {
-            
+
         }
     }
 
-    
+
 }
